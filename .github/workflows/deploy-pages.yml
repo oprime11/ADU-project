@@ -1,0 +1,46 @@
+name: Deploy ADU Compass to GitHub Pages
+
+# Deploys the static site (index.html + design-*/ + assets/) to GitHub Pages.
+# Runs from the feature branch so the live previews are available before merge.
+on:
+  push:
+    branches:
+      - claude/adu-homeowner-website-ao784w
+  workflow_dispatch:
+
+# Permissions the deploy needs (and enough to auto-enable Pages)
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow one concurrent deployment; don't cancel an in-progress one
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+        with:
+          # Turn Pages on automatically if it isn't already
+          enablement: true
+
+      - name: Upload site artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Publish the repository root (site is served from there)
+          path: .
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
