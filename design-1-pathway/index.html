@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Pathway · ADU Compass — San Mateo County</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+  :root{
+    --cream:#faf7f1; --sand:#f0e9dc; --card:#ffffff;
+    --ink:#26302a; --ink-2:#5c655e; --muted:#8a9089;
+    --forest:#2d5a3d; --forest-d:#1f4029; --terra:#c96f4a; --terra-d:#b25a37;
+    --line:#e4ddd0; --radius:18px;
+    /* validated chart palette (light) */
+    --s1:#2a78d6; --s2:#008300; --s3:#e87ba4; --s4:#eda100; --s5:#1baf7a;
+    --shadow:0 2px 10px rgba(38,48,42,.07), 0 12px 32px rgba(38,48,42,.06);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{font-family:'Inter',system-ui,sans-serif;background:var(--cream);color:var(--ink);line-height:1.6}
+  h1,h2,h3{font-family:'Fraunces',serif;line-height:1.15;font-weight:600}
+  a{color:var(--forest)}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+  section{padding:88px 0}
+  .kicker{display:inline-block;font-size:.78rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--terra);margin-bottom:14px}
+  .sec-h{font-size:clamp(1.7rem,3.4vw,2.5rem);margin-bottom:12px}
+  .sec-sub{color:var(--ink-2);max-width:640px;margin-bottom:44px}
+
+  /* nav */
+  nav{position:sticky;top:0;z-index:1000;background:rgba(250,247,241,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .nav-in{display:flex;align-items:center;gap:28px;height:64px}
+  .logo{font-family:'Fraunces',serif;font-weight:700;font-size:1.15rem;color:var(--forest);text-decoration:none;margin-right:auto}
+  .logo span{color:var(--terra)}
+  nav a.link{color:var(--ink-2);text-decoration:none;font-size:.9rem;font-weight:500}
+  nav a.link:hover{color:var(--forest)}
+  .btn{display:inline-block;background:var(--forest);color:#fff;border:none;border-radius:999px;
+       padding:12px 24px;font:600 .92rem 'Inter',sans-serif;cursor:pointer;text-decoration:none;transition:background .15s}
+  .btn:hover{background:var(--forest-d)}
+  .btn.terra{background:var(--terra)} .btn.terra:hover{background:var(--terra-d)}
+  @media(max-width:760px){nav a.link{display:none}}
+
+  /* hero */
+  .hero{padding:96px 0 80px;background:
+    radial-gradient(900px 420px at 85% -10%, #e9f0e6 0%, transparent 60%),
+    radial-gradient(700px 380px at -10% 110%, #f6e8de 0%, transparent 55%)}
+  .hero h1{font-size:clamp(2.4rem,5.4vw,3.9rem);max-width:760px;margin-bottom:20px}
+  .hero h1 em{font-style:italic;color:var(--terra)}
+  .hero p.lede{font-size:1.13rem;color:var(--ink-2);max-width:620px;margin-bottom:34px}
+  .addr{display:flex;gap:10px;max-width:600px;background:#fff;border:1.5px solid var(--line);
+        border-radius:999px;padding:6px 6px 6px 22px;box-shadow:var(--shadow)}
+  .addr input{flex:1;border:none;outline:none;font:500 1rem 'Inter',sans-serif;background:transparent;color:var(--ink)}
+  .hero-stats{display:flex;gap:14px;flex-wrap:wrap;margin-top:38px}
+  .chip{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 18px;box-shadow:var(--shadow)}
+  .chip b{display:block;font-family:'Fraunces',serif;font-size:1.3rem;color:var(--forest)}
+  .chip small{color:var(--muted);font-size:.78rem}
+
+  /* journey */
+  .path{position:relative;margin-left:24px;padding-left:44px;border-left:3px solid var(--line)}
+  .step{position:relative;margin-bottom:40px;max-width:720px}
+  .step:last-child{margin-bottom:0}
+  .step::before{content:attr(data-n);position:absolute;left:-67px;top:0;width:44px;height:44px;border-radius:50%;
+    background:var(--forest);color:#fff;font:700 1rem 'Fraunces',serif;display:flex;align-items:center;justify-content:center;
+    border:5px solid var(--cream)}
+  .step .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:24px 28px;box-shadow:var(--shadow)}
+  .step h3{font-size:1.25rem;margin-bottom:4px}
+  .step .dur{display:inline-block;background:var(--sand);color:var(--forest-d);border-radius:999px;
+             font-size:.76rem;font-weight:600;padding:3px 12px;margin-bottom:10px}
+  .step p{color:var(--ink-2);font-size:.95rem}
+
+  /* estimator */
+  .est{background:#fff;border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow);overflow:hidden;
+       display:grid;grid-template-columns:1.05fr .95fr}
+  @media(max-width:900px){.est{grid-template-columns:1fr}}
+  .est-controls{padding:36px;border-right:1px solid var(--line)}
+  @media(max-width:900px){.est-controls{border-right:none;border-bottom:1px solid var(--line)}}
+  .est-out{padding:36px;background:linear-gradient(180deg,#fbf9f4, #f5efe4)}
+  .f-label{font-size:.8rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:26px 0 10px}
+  .f-label:first-child{margin-top:0}
+  .type-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  @media(max-width:520px){.type-grid{grid-template-columns:1fr}}
+  .type-opt{border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;cursor:pointer;background:#fff;transition:all .12s}
+  .type-opt:hover{border-color:var(--forest)}
+  .type-opt.on{border-color:var(--forest);background:#eef4ee;box-shadow:inset 0 0 0 1px var(--forest)}
+  .type-opt b{display:block;font-size:.92rem}
+  .type-opt small{color:var(--muted);font-size:.76rem;line-height:1.35;display:block}
+  .seg{display:flex;background:var(--sand);border-radius:12px;padding:4px;gap:4px}
+  .seg button{flex:1;border:none;border-radius:9px;padding:9px 6px;font:600 .85rem 'Inter',sans-serif;
+              background:transparent;color:var(--ink-2);cursor:pointer}
+  .seg button.on{background:#fff;color:var(--forest);box-shadow:0 1px 4px rgba(0,0,0,.12)}
+  input[type=range]{width:100%;accent-color:var(--terra);margin-top:6px}
+  .size-read{display:flex;justify-content:space-between;align-items:baseline}
+  .size-read b{font-family:'Fraunces',serif;font-size:1.35rem;color:var(--forest)}
+  .size-read span{color:var(--muted);font-size:.85rem}
+  select{width:100%;padding:11px 12px;border:1.5px solid var(--line);border-radius:12px;
+         font:500 .9rem 'Inter',sans-serif;color:var(--ink);background:#fff}
+
+  .big-range{font-family:'Fraunces',serif;font-size:clamp(1.9rem,3.4vw,2.6rem);color:var(--forest-d)}
+  .out-sub{color:var(--ink-2);font-size:.9rem;margin-bottom:22px}
+  .bar{display:flex;height:34px;border-radius:10px;overflow:hidden;background:var(--line)}
+  .bar i{display:block;height:100%;border-right:2px solid #f5efe4}
+  .bar i:last-child{border-right:none}
+  .legend{margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:6px 18px;font-size:.83rem}
+  @media(max-width:520px){.legend{grid-template-columns:1fr}}
+  .legend li{list-style:none;display:flex;align-items:center;gap:8px;color:var(--ink-2)}
+  .legend .sw{width:11px;height:11px;border-radius:3px;flex:none}
+  .legend b{margin-left:auto;color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
+  .mini-tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:26px}
+  .tile{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+  .tile small{color:var(--muted);font-size:.74rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+  .tile b{display:block;font-family:'Fraunces',serif;font-size:1.25rem;color:var(--ink);margin-top:2px}
+  .tile .up{color:#006300;font-size:.78rem;font-weight:600}
+
+  /* timeline strip */
+  .tl{margin-top:26px}
+  .tl-track{display:flex;border-radius:10px;overflow:hidden;height:26px}
+  .tl-track i{border-right:2px solid #f5efe4}
+  .tl-track i:last-child{border-right:none}
+  .tl-lab{display:flex;font-size:.72rem;color:var(--muted);margin-top:6px;justify-content:space-between}
+
+  /* map section */
+  .map-shell{display:grid;grid-template-columns:340px 1fr;gap:0;background:#fff;border:1px solid var(--line);
+             border-radius:24px;overflow:hidden;box-shadow:var(--shadow)}
+  @media(max-width:860px){.map-shell{grid-template-columns:1fr}}
+  .map-side{padding:28px;border-right:1px solid var(--line)}
+  #map1{min-height:520px}
+  .map-side .addr{box-shadow:none;padding-left:16px}
+  .plan-list{margin-top:18px;display:flex;flex-direction:column;gap:8px}
+  .plan-b{display:flex;justify-content:space-between;align-items:center;border:1.5px solid var(--line);
+          border-radius:12px;padding:10px 14px;background:#fff;cursor:pointer;font:500 .88rem 'Inter',sans-serif;color:var(--ink)}
+  .plan-b:hover{border-color:var(--forest)}
+  .plan-b.on{border-color:var(--forest);background:#eef4ee}
+  .plan-b small{color:var(--muted)}
+  .map-hint{font-size:.8rem;color:var(--muted);margin-top:16px;line-height:1.5}
+  .rot{margin-top:16px}
+  .geo-status{font-size:.8rem;margin-top:10px;color:var(--forest);min-height:1.2em}
+
+  /* rules */
+  .rules-grid{display:grid;grid-template-columns:360px 1fr;gap:28px;align-items:start}
+  @media(max-width:860px){.rules-grid{grid-template-columns:1fr}}
+  .city-card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:26px;box-shadow:var(--shadow)}
+  .city-card h3{font-size:1.15rem;margin:14px 0 6px}
+  .city-card p{color:var(--ink-2);font-size:.92rem}
+  .law-list{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media(max-width:640px){.law-list{grid-template-columns:1fr}}
+  .law{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+  .law b{display:block;font-size:.92rem;margin-bottom:3px;color:var(--forest-d)}
+  .law p{font-size:.83rem;color:var(--ink-2)}
+
+  /* pros */
+  .pro-filter{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:26px}
+  .pro-filter button{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:8px 16px;
+    font:600 .84rem 'Inter',sans-serif;color:var(--ink-2);cursor:pointer}
+  .pro-filter button.on{background:var(--forest);border-color:var(--forest);color:#fff}
+  .pro-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+  .pro{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);
+       display:flex;flex-direction:column;gap:8px}
+  .pro .tag{align-self:flex-start;background:var(--sand);color:var(--forest-d);border-radius:999px;
+            font-size:.72rem;font-weight:700;padding:3px 12px;letter-spacing:.04em}
+  .pro .tag.free{background:#e2efe2;color:#006300}
+  .pro h3{font-size:1.1rem}
+  .pro .area{font-size:.78rem;color:var(--muted)}
+  .pro p{font-size:.88rem;color:var(--ink-2);flex:1}
+  .pro a{font-weight:600;font-size:.88rem;text-decoration:none}
+  .disclaim{font-size:.78rem;color:var(--muted);margin-top:20px;max-width:640px}
+
+  /* faq */
+  details{background:#fff;border:1px solid var(--line);border-radius:14px;margin-bottom:10px;overflow:hidden}
+  summary{cursor:pointer;padding:18px 22px;font-weight:600;font-size:.97rem;list-style:none;display:flex;justify-content:space-between;gap:14px}
+  summary::after{content:"+";font-family:'Fraunces',serif;color:var(--terra);font-size:1.3rem;line-height:1}
+  details[open] summary::after{content:"–"}
+  details p{padding:0 22px 20px;color:var(--ink-2);font-size:.92rem}
+
+  footer{background:var(--forest-d);color:#cfdccf;padding:56px 0;font-size:.85rem}
+  footer .logo{color:#fff}
+  footer a{color:#e8f0e6}
+  .foot-grid{display:flex;justify-content:space-between;gap:32px;flex-wrap:wrap}
+  .srcs{max-width:560px;line-height:1.7}
+</style>
+</head>
+<body>
+
+<nav><div class="wrap nav-in">
+  <a class="logo" href="#top">ADU&nbsp;<span>Compass</span> <small style="font-family:Inter;font-weight:500;color:var(--muted);font-size:.72rem">· San Mateo County</small></a>
+  <a class="link" href="#journey">The Journey</a>
+  <a class="link" href="#estimate">Cost &amp; Timeline</a>
+  <a class="link" href="#map-sec">Your Property</a>
+  <a class="link" href="#rules">Rules</a>
+  <a class="link" href="#pros">Builders</a>
+  <a class="btn terra" href="#estimate" style="padding:9px 18px;font-size:.85rem">Plan my ADU</a>
+</div></nav>
+
+<header class="hero" id="top"><div class="wrap">
+  <h1>Your backyard has room for <em>one more home.</em></h1>
+  <p class="lede">Everything a San Mateo County homeowner needs to plan an accessory dwelling unit —
+  real local costs, timelines, permits, taxes, rental income, and who can build it — in one guided path.</p>
+  <form class="addr" id="hero-addr">
+    <input type="text" id="hero-addr-in" placeholder="Enter your home address to see your property…" aria-label="Address">
+    <button class="btn" type="submit">See my lot</button>
+  </form>
+  <div class="hero-stats">
+    <div class="chip"><b>$150K–$550K</b><small>typical all-in cost by type</small></div>
+    <div class="chip"><b>9–16 months</b><small>door-to-door timeline</small></div>
+    <div class="chip"><b>$2,200–$4,200</b><small>monthly rent, studio → 2 bed</small></div>
+    <div class="chip"><b>800 sq ft</b><small>guaranteed by state law</small></div>
+  </div>
+</div></header>
+
+<section id="journey"><div class="wrap">
+  <span class="kicker">Start to finish</span>
+  <h2 class="sec-h">The six-step ADU journey</h2>
+  <p class="sec-sub">Every ADU in the county follows the same path. Here's what happens at each step,
+  how long it takes, and what to watch for.</p>
+  <div class="path" id="path"></div>
+</div></section>
+
+<section id="estimate" style="background:var(--sand);border-block:1px solid var(--line)"><div class="wrap">
+  <span class="kicker">Play with the numbers</span>
+  <h2 class="sec-h">What will <em style="font-style:italic;color:var(--terra)">your</em> ADU cost?</h2>
+  <p class="sec-sub">Pick a type, size, and finish level. Estimates use 2026 San Mateo County pricing and update instantly —
+  including timeline, taxes, rent, and payback.</p>
+
+  <div class="est">
+    <div class="est-controls">
+      <div class="f-label">ADU type</div>
+      <div class="type-grid" id="type-grid"></div>
+      <div class="f-label">Size</div>
+      <div class="size-read"><b id="size-big">600 sq ft</b><span id="size-note">1 bed · 1 bath</span></div>
+      <input type="range" id="size" min="300" max="1200" step="50" value="600" aria-label="Size in square feet">
+      <div class="f-label">Finish level</div>
+      <div class="seg" id="finish-seg"></div>
+      <div class="f-label">Site conditions</div>
+      <select id="site-sel"></select>
+    </div>
+    <div class="est-out">
+      <small style="font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-size:.74rem">Estimated all-in cost</small>
+      <div class="big-range" id="cost-range">$—</div>
+      <div class="out-sub" id="cost-sub"></div>
+      <div class="bar" id="cost-bar" role="img" aria-label="Cost breakdown"></div>
+      <ul class="legend" id="cost-legend"></ul>
+      <div class="tl">
+        <small style="font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-size:.74rem">Estimated timeline · <span id="tl-total"></span></small>
+        <div class="tl-track" id="tl-track" style="margin-top:8px"></div>
+        <div class="tl-lab"><span>Kickoff</span><span>Move-in</span></div>
+      </div>
+      <div class="mini-tiles">
+        <div class="tile"><small>Monthly rent</small><b id="o-rent">—</b><span class="up" id="o-rent-band"></span></div>
+        <div class="tile"><small>Payback if rented</small><b id="o-payback">—</b><span class="up">net of vacancy &amp; expenses</span></div>
+        <div class="tile"><small>Property tax added</small><b id="o-tax">—</b><span class="up" id="o-tax-m"></span></div>
+        <div class="tile"><small>Est. value added</small><b id="o-value">—</b><span class="up">income-approach appraisal</span></div>
+      </div>
+    </div>
+  </div>
+</div></section>
+
+<section id="map-sec"><div class="wrap">
+  <span class="kicker">Will it fit?</span>
+  <h2 class="sec-h">See an ADU on your actual lot</h2>
+  <p class="sec-sub">Type your address, then drag a to-scale footprint around your yard.
+  The dashed line shows the 4-foot setback clearance state law requires from side and rear property lines.</p>
+  <div class="map-shell">
+    <div class="map-side">
+      <form class="addr" id="map-addr">
+        <input type="text" id="map-addr-in" placeholder="123 Main St, San Mateo" aria-label="Address">
+        <button class="btn" type="submit" style="padding:10px 18px;font-size:.85rem">Go</button>
+      </form>
+      <div class="geo-status" id="geo-status"></div>
+      <div class="f-label">Footprint</div>
+      <div class="plan-list" id="plan-list"></div>
+      <div class="rot">
+        <div class="f-label" style="margin-top:0">Rotate</div>
+        <input type="range" id="rot" min="0" max="180" value="0" aria-label="Rotate footprint">
+      </div>
+      <p class="map-hint">Click anywhere on the map to place the footprint, then drag the pin to move it.
+      Toggle the street layer (bottom-right) to check property lines against the county parcel viewer.</p>
+    </div>
+    <div id="map1"></div>
+  </div>
+</div></section>
+
+<section id="rules" style="background:var(--sand);border-block:1px solid var(--line)"><div class="wrap">
+  <span class="kicker">Permits &amp; regulations</span>
+  <h2 class="sec-h">The rules where you live</h2>
+  <p class="sec-sub">California law sets a strong baseline every city must honor. Your city adds local details —
+  pick yours for notes and the official source.</p>
+  <div class="rules-grid">
+    <div class="city-card">
+      <div class="f-label" style="margin-top:0">Your jurisdiction</div>
+      <select id="city-sel"></select>
+      <h3 id="city-name"></h3>
+      <p id="city-note"></p>
+      <p style="margin-top:14px"><a id="city-link" href="#" target="_blank" rel="noopener">Official ADU page →</a><br>
+      <a href="https://smcadu.org/local-rules/" target="_blank" rel="noopener">smcadu.org local rules →</a></p>
+    </div>
+    <div>
+      <div class="law-list" id="law-list"></div>
+    </div>
+  </div>
+</div></section>
+
+<section id="pros"><div class="wrap">
+  <span class="kicker">Get it built</span>
+  <h2 class="sec-h">Recommended local options</h2>
+  <p class="sec-sub">Leading Peninsula ADU providers by approach — start with the county's free resource center,
+  then collect two or three bids.</p>
+  <div class="pro-filter" id="pro-filter"></div>
+  <div class="pro-grid" id="pro-grid"></div>
+  <p class="disclaim">Listed for research convenience based on public reputation and county resources — not endorsements.
+  Verify licenses at cslb.ca.gov and always compare multiple bids.</p>
+</div></section>
+
+<section id="faq" style="background:var(--sand);border-top:1px solid var(--line)"><div class="wrap">
+  <span class="kicker">Good to know</span>
+  <h2 class="sec-h">Questions homeowners actually ask</h2>
+  <div style="max-width:760px;margin-top:36px" id="faq-list"></div>
+</div></section>
+
+<footer><div class="wrap foot-grid">
+  <div>
+    <a class="logo" href="#top">ADU <span>Compass</span></a>
+    <p style="margin-top:10px;max-width:300px">A guided path to building an accessory dwelling unit in San Mateo County.</p>
+  </div>
+  <div class="srcs">
+    <b style="color:#fff">Sources &amp; figures</b><br>
+    Rules: <a href="https://smcadu.org" target="_blank" rel="noopener">SMC ADU Resource Center</a> ·
+    <a href="https://www.smcgov.org/planning/accessory-dwelling-units-adus" target="_blank" rel="noopener">County Planning</a> ·
+    CA HCD ADU Handbook. Costs &amp; rents: published 2026 Peninsula builder pricing and market data.
+    <br><br>Estimates are for planning only — get bids and confirm rules with your city before designing.
+    Not legal, tax, or financial advice.
+  </div>
+</div></footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="../assets/adu-data.js"></script>
+<script src="../assets/adu-map.js"></script>
+<script>
+const $ = s => document.querySelector(s);
+const chartCols = ["var(--s1)","var(--s2)","var(--s3)","var(--s4)","var(--s5)"];
+
+/* ---- journey ---- */
+$("#path").innerHTML = ADU.PHASES.map((p,i)=>`
+  <div class="step" data-n="${i+1}"><div class="card">
+    <h3>${p.name}</h3>
+    <span class="dur">${p.months[0]}–${p.months[1]} months</span>
+    <p>${p.blurb}</p>
+  </div></div>`).join("");
+
+/* ---- estimator ---- */
+const est = { typeId:"detached", sf:600, finishId:"standard", siteId:"easy" };
+
+$("#type-grid").innerHTML = ADU.TYPES.map(t=>`
+  <div class="type-opt${t.id===est.typeId?" on":""}" data-id="${t.id}" role="button" tabindex="0">
+    <b>${t.name}</b><small>${t.short}</small>
+  </div>`).join("");
+$("#type-grid").addEventListener("click", e=>{
+  const el = e.target.closest(".type-opt"); if(!el) return;
+  document.querySelectorAll(".type-opt").forEach(x=>x.classList.remove("on"));
+  el.classList.add("on"); est.typeId = el.dataset.id;
+  const t = ADU.TYPES.find(x=>x.id===est.typeId);
+  const r = $("#size"); r.min = t.minSf; r.max = t.maxSf;
+  if(+r.value > t.maxSf) r.value = t.maxSf;
+  if(+r.value < t.minSf) r.value = t.minSf;
+  est.sf = +r.value; render();
+});
+
+$("#finish-seg").innerHTML = ADU.FINISHES.map(f=>
+  `<button type="button" data-id="${f.id}" class="${f.id===est.finishId?"on":""}" title="${f.blurb}">${f.name}</button>`).join("");
+$("#finish-seg").addEventListener("click", e=>{
+  if(e.target.tagName!=="BUTTON") return;
+  document.querySelectorAll("#finish-seg button").forEach(b=>b.classList.remove("on"));
+  e.target.classList.add("on"); est.finishId = e.target.dataset.id; render();
+});
+
+$("#site-sel").innerHTML = ADU.SITES.map(s=>
+  `<option value="${s.id}">${s.name} — ${s.blurb}</option>`).join("");
+$("#site-sel").addEventListener("change", e=>{ est.siteId = e.target.value; render(); });
+
+$("#size").addEventListener("input", e=>{ est.sf = +e.target.value; render(); });
+
+const ordinal = ["#86b6ef","#5598e7","#2a78d6","#1c5cab","#104281","#0d366b"]; // blue ordinal ramp
+
+function render(){
+  const r = ADU.estimate(est);
+  $("#size-big").textContent = r.sf.toLocaleString() + " sq ft";
+  const preset = [...ADU.SIZES].reverse().find(s=>r.sf>=s.sf) || ADU.SIZES[0];
+  $("#size-note").textContent = r.sf<=500 ? "Studio · 1 bath" : preset.beds;
+  $("#cost-range").textContent = ADU.moneyK(r.cost.low) + " – " + ADU.moneyK(r.cost.high);
+  $("#cost-sub").textContent = `${r.type.name} · ${r.finish.name.toLowerCase()} finish · about ${ADU.money(r.cost.mid/r.sf)} per sq ft all-in`;
+
+  const total = r.cost.breakdown.reduce((a,b)=>a+b.v,0);
+  $("#cost-bar").innerHTML = r.cost.breakdown.map((b,i)=>
+    `<i style="width:${(b.v/total*100).toFixed(1)}%;background:${chartCols[i]}" title="${b.label}: ${ADU.money(b.v)}"></i>`).join("");
+  $("#cost-legend").innerHTML = r.cost.breakdown.map((b,i)=>
+    `<li><span class="sw" style="background:${chartCols[i]}"></span>${b.label}<b>${ADU.moneyK(b.v)}</b></li>`).join("");
+
+  const phases = ADU.PHASES.filter(p=>p.id!=="bid");
+  const mos = phases.map(p=> p.id==="build" ? (r.type.buildMonths[0]+r.type.buildMonths[1])/2 : (p.months[0]+p.months[1])/2);
+  const tSum = mos.reduce((a,b)=>a+b,0);
+  $("#tl-total").textContent = `${Math.round(r.timeline.low)}–${Math.round(r.timeline.high)} months`;
+  $("#tl-track").innerHTML = phases.map((p,i)=>
+    `<i style="width:${(mos[i]/tSum*100).toFixed(1)}%;background:${ordinal[i]}" title="${p.name}: ~${mos[i].toFixed(1)} mo"></i>`).join("");
+
+  $("#o-rent").textContent = ADU.money(r.rent.mid) + "/mo";
+  $("#o-rent-band").textContent = r.rent.band.label + " · " + ADU.money(r.rent.band.range[0]) + "–" + ADU.money(r.rent.band.range[1]);
+  $("#o-payback").textContent = r.paybackYears.toFixed(1) + " yrs";
+  $("#o-tax").textContent = "+" + ADU.money(r.tax.annual) + "/yr";
+  $("#o-tax-m").textContent = "≈ " + ADU.money(r.tax.monthly) + "/mo · home not reassessed";
+  $("#o-value").textContent = "+" + ADU.moneyK(r.valueAdd);
+}
+render();
+
+/* ---- map ---- */
+let mapApi = null, activePlan = ADU.SIZES[1];
+function ensureMap(){
+  if(mapApi) return mapApi;
+  mapApi = AduMap.create({ container:"map1", accent:"#c96f4a",
+    dims: activePlan.dims, label: `${activePlan.label} · ${activePlan.sf} sq ft` });
+  return mapApi;
+}
+$("#plan-list").innerHTML = ADU.SIZES.map((s,i)=>`
+  <button type="button" class="plan-b${i===1?" on":""}" data-i="${i}">
+    <span>${s.label} · ${s.sf} sq ft</span><small>${s.dims[0]}′×${s.dims[1]}′</small>
+  </button>`).join("");
+$("#plan-list").addEventListener("click", e=>{
+  const b = e.target.closest(".plan-b"); if(!b) return;
+  document.querySelectorAll(".plan-b").forEach(x=>x.classList.remove("on"));
+  b.classList.add("on");
+  activePlan = ADU.SIZES[+b.dataset.i];
+  ensureMap().setPlan(activePlan.dims, `${activePlan.label} · ${activePlan.sf} sq ft`);
+});
+$("#rot").addEventListener("input", e=> ensureMap().setRotation(e.target.value));
+
+async function goGeocode(q){
+  if(!q.trim()) return;
+  const api = ensureMap();
+  $("#geo-status").textContent = "Locating…";
+  try{
+    const name = await api.geocode(q);
+    $("#geo-status").textContent = "📍 " + name.split(",").slice(0,3).join(",");
+  }catch(err){ $("#geo-status").textContent = "⚠ " + err.message; }
+}
+$("#map-addr").addEventListener("submit", e=>{ e.preventDefault(); goGeocode($("#map-addr-in").value); });
+$("#hero-addr").addEventListener("submit", e=>{
+  e.preventDefault();
+  const v = $("#hero-addr-in").value;
+  $("#map-addr-in").value = v;
+  document.getElementById("map-sec").scrollIntoView({behavior:"smooth"});
+  setTimeout(()=>{ ensureMap().invalidate(); goGeocode(v); }, 450);
+});
+new IntersectionObserver((en)=>{ if(en[0].isIntersecting){ ensureMap().invalidate(); } },{threshold:.1})
+  .observe(document.getElementById("map-sec"));
+
+/* ---- rules ---- */
+$("#city-sel").innerHTML = ADU.CITIES.map((c,i)=>`<option value="${i}">${c.name}</option>`).join("");
+function renderCity(i){
+  const c = ADU.CITIES[i];
+  $("#city-name").textContent = c.name;
+  $("#city-note").textContent = c.note;
+  $("#city-link").href = c.site;
+}
+$("#city-sel").addEventListener("change", e=>renderCity(+e.target.value));
+renderCity(0);
+$("#law-list").innerHTML = ADU.STATE_LAW.map(l=>`<div class="law"><b>${l.t}</b><p>${l.d}</p></div>`).join("");
+
+/* ---- pros ---- */
+const cats = ["All", ...new Set(ADU.PROS.map(p=>p.cat))];
+let activeCat = "All";
+function renderPros(){
+  $("#pro-filter").innerHTML = cats.map(c=>
+    `<button type="button" class="${c===activeCat?"on":""}" data-c="${c}">${c}</button>`).join("");
+  $("#pro-grid").innerHTML = ADU.PROS.filter(p=>activeCat==="All"||p.cat===activeCat).map(p=>`
+    <div class="pro">
+      <span class="tag${p.cat==="Free guidance"?" free":""}">${p.tag}</span>
+      <h3>${p.name}</h3><span class="area">${p.area}</span>
+      <p>${p.blurb}</p>
+      <a href="${p.url}" target="_blank" rel="noopener">Visit site →</a>
+    </div>`).join("");
+}
+$("#pro-filter").addEventListener("click", e=>{
+  if(e.target.tagName!=="BUTTON") return;
+  activeCat = e.target.dataset.c; renderPros();
+});
+renderPros();
+
+/* ---- faq ---- */
+$("#faq-list").innerHTML = ADU.FAQ.map(f=>
+  `<details><summary>${f.q}</summary><p>${f.a}</p></details>`).join("");
+</script>
+</body>
+</html>

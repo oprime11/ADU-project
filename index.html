@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ADU Compass — Three Website Designs · San Mateo County</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#f6f6f3;--ink:#16181a;--ink2:#585d63;--line:#e3e3dd;--card:#fff;
+        --shadow:0 2px 8px rgba(0,0,0,.05),0 14px 40px rgba(0,0,0,.07)}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+  .wrap{max-width:1120px;margin:0 auto;padding:72px 24px}
+  h1{font-size:clamp(1.9rem,4vw,2.8rem);font-weight:800;letter-spacing:-.02em;margin-bottom:14px}
+  .lede{color:var(--ink2);max-width:680px;margin-bottom:14px}
+  .note{font-size:.85rem;color:var(--ink2);background:#fff;border:1px solid var(--line);border-radius:12px;
+        padding:12px 16px;max-width:680px;margin-bottom:48px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:22px;margin-bottom:56px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:20px;overflow:hidden;box-shadow:var(--shadow);
+        display:flex;flex-direction:column;text-decoration:none;color:var(--ink);transition:transform .15s}
+  .card:hover{transform:translateY(-3px)}
+  .thumb{height:170px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.5rem;letter-spacing:-.02em}
+  .t1{background:linear-gradient(135deg,#faf7f1,#e9f0e6 55%,#f6e8de);color:#2d5a3d;font-family:Georgia,serif;font-style:italic}
+  .t2{background:linear-gradient(135deg,#eef2ff,#f5f6f8 60%,#e0f2ef);color:#4f46e5}
+  .t3{background:linear-gradient(135deg,#111310,#1b1d19 60%,#241f0f);color:#eda100;font-family:'Space Grotesk',Inter,sans-serif}
+  .body{padding:22px 24px 26px;display:flex;flex-direction:column;gap:10px;flex:1}
+  .k{font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#8b909b}
+  .card h2{font-size:1.25rem;font-weight:700}
+  .card p{font-size:.9rem;color:var(--ink2);flex:1}
+  .card .cta{font-weight:700;font-size:.9rem;color:#16181a}
+  .best{font-size:.8rem;color:var(--ink2)}
+  .best b{color:var(--ink)}
+  table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;font-size:.87rem;box-shadow:var(--shadow)}
+  th{text-align:left;font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;color:#8b909b;padding:13px 16px;border-bottom:1px solid var(--line);background:#fafaf8}
+  td{padding:12px 16px;border-bottom:1px solid var(--line);color:var(--ink2);vertical-align:top}
+  td:first-child{font-weight:600;color:var(--ink)}
+  tr:last-child td{border-bottom:none}
+  .check{color:#006300;font-weight:700}
+  h3{margin:56px 0 16px;font-size:1.15rem}
+  .tbl-scroll{overflow-x:auto}
+  footer{margin-top:56px;font-size:.8rem;color:#8b909b;max-width:720px}
+</style>
+</head>
+<body><div class="wrap">
+  <h1>ADU Compass — three designs, one mission</h1>
+  <p class="lede">A homeowner's complete guide to designing and building an accessory dwelling unit in
+  San Mateo County: costs, timeline, sizes, permits, taxes, rental income, an address-based lot visualizer,
+  and recommended local builders. The same content and live calculators, presented three very different ways.</p>
+  <p class="note">💡 Open each design and try it: enter an address in the map section, drag the ADU footprint
+  around your yard, and move the cost sliders. All three share one data engine (<code>assets/adu-data.js</code>)
+  so estimates always agree.</p>
+
+  <div class="grid">
+    <a class="card" href="design-1-pathway/index.html">
+      <div class="thumb t1">The Pathway</div>
+      <div class="body">
+        <span class="k">Design 1 · Warm &amp; guided</span>
+        <h2>The Pathway</h2>
+        <p>A friendly, editorial single page organized as a six-step journey. Serif warmth, cream and
+        forest-green palette, and a wizard-like estimator. Feels like a trusted guidebook.</p>
+        <span class="best">Best for: <b>first-time homeowners who want hand-holding</b></span>
+        <span class="cta">Open design →</span>
+      </div>
+    </a>
+    <a class="card" href="design-2-command/index.html">
+      <div class="thumb t2">Command Center</div>
+      <div class="body">
+        <span class="k">Design 2 · App-style dashboard</span>
+        <h2>Command Center</h2>
+        <p>A SaaS-style planner with sidebar navigation and a live "Your ADU Plan" rail that updates as you
+        adjust anything — type comparisons, Gantt timeline, ROI panel, sortable builder table.</p>
+        <span class="best">Best for: <b>data-driven owners comparing scenarios</b></span>
+        <span class="cta">Open design →</span>
+      </div>
+    </a>
+    <a class="card" href="design-3-backyard/index.html">
+      <div class="thumb t3">BACKYARD.</div>
+      <div class="body">
+        <span class="k">Design 3 · Editorial scrollytelling</span>
+        <h2>Backyard</h2>
+        <p>A bold, magazine-style story in eight chapters — The Dream, The Rules, The Price, The Payoff —
+        with a chapter progress rail, full-bleed satellite map, and big honest numbers.</p>
+        <span class="best">Best for: <b>inspiring owners who are still deciding</b></span>
+        <span class="cta">Open design →</span>
+      </div>
+    </a>
+  </div>
+
+  <h3 style="margin-top:0">Every design includes</h3>
+  <div class="tbl-scroll"><table>
+    <thead><tr><th>Capability</th><th>What it does</th><th>Pathway</th><th>Command</th><th>Backyard</th></tr></thead>
+    <tbody>
+      <tr><td>Process guide</td><td>Six-phase journey from feasibility to move-in with durations</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td></tr>
+      <tr><td>Cost estimator</td><td>Type × size × finish × site → all-in range with full breakdown</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td></tr>
+      <tr><td>Timeline estimator</td><td>Phase-by-phase schedule tied to your chosen ADU type</td><td class="check">✓</td><td class="check">✓ Gantt</td><td class="check">✓</td></tr>
+      <tr><td>Size explorer</td><td>Studio → 3-bed presets with real footprint dimensions</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓ visual</td></tr>
+      <tr><td>Permits &amp; rules</td><td>CA state-law guarantees + all 21 SMC jurisdictions with official links</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td></tr>
+      <tr><td>Tax impact</td><td>Added tax on the ADU only — Prop 13 basis preserved</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td></tr>
+      <tr><td>Rental revenue &amp; ROI</td><td>Q1-2026 Peninsula rents, net income, payback, value added</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td></tr>
+      <tr><td>Lot visualizer</td><td>Address → satellite view with draggable, to-scale ADU footprint + 4-ft setback guide</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓ full-bleed</td></tr>
+      <tr><td>Local builders</td><td>Filterable directory: free county help, prefab, design-build, design-only</td><td class="check">✓ cards</td><td class="check">✓ table</td><td class="check">✓ list</td></tr>
+      <tr><td>FAQ</td><td>The questions homeowners actually ask, answered plainly</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td></tr>
+    </tbody>
+  </table></div>
+
+  <footer>Data sources: SMC ADU Resource Center (smcadu.org), San Mateo County Planning, CA HCD ADU Handbook,
+  and published 2026 Peninsula builder pricing and rental market data. Maps: Esri World Imagery + OpenStreetMap
+  via Leaflet with Nominatim geocoding (no API key required; the map module is Google-Maps-swappable).
+  All figures are planning estimates — not legal, tax, or financial advice.</footer>
+</div></body>
+</html>
